@@ -1,0 +1,7 @@
+
+
+replace etymonline-grabber with Gerard de Milo's Etymological Wordnet
+
+http://www1.icsi.berkeley.edu/~demelo/etymwn/
+
+
