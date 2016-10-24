@@ -2,6 +2,11 @@
 etymonline.tsv
 old/etymologies.csv
 
+
+#This stupid thing
+etymwn.tsv
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
