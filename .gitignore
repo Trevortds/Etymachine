@@ -1,3 +1,7 @@
+#user-defined
+etymonline.tsv
+old/etymologies.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
