@@ -5,7 +5,7 @@ old/etymologies.csv
 
 #This stupid thing
 etymwn.tsv
-
+*.tsv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
