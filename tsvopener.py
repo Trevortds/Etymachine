@@ -1,8 +1,8 @@
 
-import requests
+# import requests
 import re
-import os
-import subprocess
+# import os
+# import subprocess
 import csv
 from bs4 import BeautifulSoup
 
@@ -38,6 +38,7 @@ def writeitout(etymdict, filename):
 
 
 def makelinks(etymdict):
+    see_pattern = re.compile("^[sS]ee (.*?)[.,;]( |$)")
     for key in etymdict.keys():
         match = see_pattern.search(etymdict[key])
         if match is not None:
@@ -82,7 +83,6 @@ def makelinks(etymdict):
 
 
 etymdict = {}
-see_pattern = re.compile("^[sS]ee (.*?)[.,;]( |$)")
 
 # htmlremoved
 with open('etymonline.tsv', 'r') as readfile:

@@ -6,14 +6,18 @@ preprocessing:
   ✔ purge html tags @done (16-11-7 16:04)
   ✔ purge html objects @done (16-11-11 16:04)
   ✔ fix chains/links @done (16-11-11 16:04)
-  ☐ write in doc @today
+  ✔ write in doc @today @done (16-11-14 17:29)
 
 
 initial categorization:
-  ☐ make the hierarchy @today
-  ☐ make regexes to find names @today
+  ✔ make the hierarchy @today @done (16-11-14 17:29)
+  ✔ make regexes to find names @today @done (16-11-14 17:29)
   ☐ take a random sample of about 10% of the data
   ☐ check the tags on those samples against the definitions, record the number of errors
+    ☐ print word category and definition
+    ☐ take user input (correction or none) and store stats (store result in new file)
+    ☐ include a method for going backwards for a mistake
+  ☐ do it
   ☐ write in doc
 
 Machine learning categorization:
