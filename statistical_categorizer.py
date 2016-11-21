@@ -5,8 +5,8 @@ from nltk import word_tokenize
 from sklearn import svm
 
 # set these to true and run whenever categorized.tsv changes
-initletters = False
-initwords = False
+initletters = True
+initwords = True
 
 stops = stopwords.words('english')
 etymdict = tsvopener.etymdict
@@ -21,6 +21,8 @@ with open('categorized.tsv', 'r') as readfile:
 
 allwords = []
 allletters = []
+
+print("Initializing wordlist")
 
 if initwords:
     allwords = set()
@@ -40,6 +42,8 @@ else:
     with open("words.txt", "r") as readfile:
         for line in readfile:
             allwords.append(line)
+
+print("Initializing letter list")
 
 if initletters:
     allletters = set()
@@ -70,7 +74,12 @@ def bag_of_words_featurizer(word, definition):
 X = []
 t = []
 
-for key in category_dict.keys():
+print("constructing input vectors")
+
+keys_to_test = list(category_dict.keys())[:100]
+
+
+for key in keys_to_test:
     X.append(bag_of_words_featurizer(key, etymdict[key]))
     if category_dict[key] == "English":
         t.append(0)
@@ -86,5 +95,3 @@ for key in category_dict.keys():
         t.append(5)
     else:
         t.append(5)
-
-
