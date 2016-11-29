@@ -1,8 +1,8 @@
 
 
 features:
-  ☐ bag of words
-  ☐ characters present
+  ✔ bag of words @done (16-11-21 13:25)
+  ✔ characters present @done (16-11-23 12:30)
   ☐ syllables
   ☐ bigrams (over characters and/or syllables)
   ☐ attested year (or none) 
@@ -10,7 +10,8 @@ features:
   ☐ 
 
 Machine learning categorization:
-  ☐ vectorize definitions (features below)
+  ✔ vectorize definitions (features below) @done (16-11-23 12:30)
+  ☐ SVM @today
   ☐ run through naive bayes
   ☐ run through k-nearest neighbors
   ☐ add some neural network stuff to this list
@@ -20,6 +21,11 @@ Machine learning categorization:
 
 other:
   ☐ find some sources to cite
+
+
+
+
+
 
 preprocessing:
 

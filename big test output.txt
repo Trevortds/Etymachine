@@ -1,0 +1,60 @@
+big test output
+
+Initializing wordlist
+Initializing letter list
+Reading in design and target matrices
+training linearSVC
+done
+metrics.f1score: 
+0.855
+training SVC with linear kernel
+done
+metrics.f1score: 
+0.825
+Reading in design and target matrices
+training linearSVC
+done
+metrics.f1score: 
+0.82
+training SVC with linear kernel
+done
+metrics.f1score: 
+0.81
+Reading in design and target matrices
+training linearSVC
+done
+metrics.f1score: 
+0.825
+training SVC with linear kernel
+done
+metrics.f1score: 
+0.815
+Reading in design and target matrices
+/home/trevor/anaconda3/envs/snlp/lib/python3.5/site-packages/sklearn/utils/validation.py:429: DataConversionWarning: Data with input dtype int64 was converted to float64 by the normalize function.
+  warnings.warn(msg, _DataConversionWarning)
+training linearSVC
+done
+metrics.f1score: 
+0.55
+training SVC with linear kernel
+done
+metrics.f1score: 
+0.49
+Reading in design and target matrices
+training linearSVC
+done
+metrics.f1score: 
+0.57
+training SVC with linear kernel
+done
+metrics.f1score: 
+0.52
+Reading in design and target matrices
+training linearSVC
+done
+metrics.f1score: 
+0.57
+training SVC with linear kernel
+done
+metrics.f1score: 
+0.52
