@@ -37,6 +37,16 @@ def writeitout(etymdict, filename):
     # there were 269 of them (one, Pablum, had a capital S)
 
 
+def open_tsv(filename):
+    output = {}
+    with open(filename, 'r') as readfile:
+        reader = csv.reader(readfile, delimiter='\t', quotechar='|')
+
+        for line in reader:
+            output[line[0]] = line[1]
+    return output
+
+
 def makelinks(etymdict):
     see_pattern = re.compile("^[sS]ee (.*?)[.,;]( |$)")
     for key in etymdict.keys():
