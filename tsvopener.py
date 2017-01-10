@@ -8,22 +8,41 @@ from bs4 import BeautifulSoup
 
 
 def HTMLtoUnicode(text):
+    '''
+    :text: text from etymonline dictionary entry
+    :return: BeautifulSoup interpreted string
+    '''
     text = BeautifulSoup(text)
     return text.string
 
 
 def apostrophefixer(text):
+    '''
+    for some reason apostrophes are broken, this fixes them. 
+    :text: text to be fixed
+    :return: same text but with apostrophes fixed
+    '''
     text = re.sub("&#039;", "\'", text)
     return text
 
 
 def POSremover(text):
+    '''
+    do not call this function, I shouldn't have written it in the first place
+    :text: some text to be cleaned of part of speech tags
+    :return: text without part of speech tags
+    '''
     # this is dumb. multiple keys error
     text = re.sub(" (.*)", "", text)
     return text
 
 
 def writeitout(etymdict, filename):
+    '''
+    takes an input dict and writes it out as a tsv file. 
+    :etymdict: dictionary to be written out
+    :filename: the name of the file to write it to. 
+    '''
     with open(filename, 'w') as writefile:
         etymwriter = csv.writer(writefile, delimiter='\t',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -38,6 +57,11 @@ def writeitout(etymdict, filename):
 
 
 def open_tsv(filename):
+    '''
+    opens a tsv file and reads it into a dictionary
+    :filename: the filename of the tsv file. 
+    :return: a dictionary mapping the first column of the tsv to the second
+    '''
     output = {}
     with open(filename, 'r') as readfile:
         reader = csv.reader(readfile, delimiter='\t', quotechar='|')
@@ -48,6 +72,11 @@ def open_tsv(filename):
 
 
 def makelinks(etymdict):
+    '''
+    fixes instances where a dictionary entry is simple "see [related word]"
+    :etymdict: dictionary of words mapped to etymological entries
+    :return: the same dictionary with the links resolved
+    '''
     see_pattern = re.compile("^[sS]ee (.*?)[.,;]( |$)")
     for key in etymdict.keys():
         match = see_pattern.search(etymdict[key])

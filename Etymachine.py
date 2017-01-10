@@ -7,6 +7,10 @@ import pylab as pl
 import tsvopener
 import dawg
 from nltk.corpus import brown
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 test_text = "four score and seven years ago, our fathers brought fourth\
              on this continent a new nation."
@@ -19,6 +23,12 @@ category_dawg = dawg.BytesDAWG([(x, str.encode(new_category_dict[x])) for x
 
 
 def make_lexicon_pie(input_dict, title):
+    '''
+    Make a pie of the full lexicon based on the given mapping of words to 
+    languages
+    :input_dict: dict of words to language sources
+    :title: title to put on the pie chart
+    '''
     e = 0
     f = 0
     n = 0
@@ -51,8 +61,19 @@ def make_lexicon_pie(input_dict, title):
     pl.show()
 
 
-def make_analysis_pie(sentences, title, token=False, ignore_unknowns=False,
+def make_analysis_pie(sentences, title="Pie Chart", token=False, ignore_unknowns=False,
                       show=True):
+    '''
+    Analyzes the given text and generates a pie chart to show the proportions 
+    of etymological origins in it. 
+    :sentences: tagged sentences from the Brown corpus
+    :title: title to go on the chart
+    :token: whether to count token frequencies instead of word frequencies
+    :ignore_unknowns: whether to have a slice for unknowns in the chart
+    :show: whether to show the chart after completeion. 
+    :return: the proportions of each language origin in the text in the order
+        'Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'Old English'
+    '''
     e = f = n = g = l = o = u = 0
     if token:
         already_seen = []
@@ -99,13 +120,20 @@ def make_analysis_pie(sentences, title, token=False, ignore_unknowns=False,
     if show:
         pl.show()
 
-    return unknowns
+    return fracs
     # return [e, f, n, l, g, o, u, total]
 
 
 # make_pie(new_category_dict, "Proportions of etymologies in the lexicon")
 
 def reduce_brown_pos(word, brown_tag):
+    '''
+    Turns a brown part of speech into a word part of speech. 
+    :word: the word in question
+    :brown_tag: the tag from the brown corpus
+    :return: the etymdict equivalent of the brown tag, or "skip" for 
+        punctuation, or None for unknowns
+    '''
     skip_tags = ['(', ')', '*', ',', '--', '.', ':', '\'\'', '``', '\'',
                  '.-HL', ',-HL', '(-HL', ')-HL']
 
@@ -153,6 +181,8 @@ def reduce_brown_pos(word, brown_tag):
         return "adj"
     elif brown_tag.startswith("EX"):
         return "adv.,conj"
+    # elif "$" in word: late addition, not reflected in submitted charts
+    #     return "skip"
 
     else:
         print(word, " ", brown_tag)
@@ -170,6 +200,14 @@ lemmatizer = nltk.stem.WordNetLemmatizer()
 
 
 def label_word(word, brown_tag, lemmatized=False):
+    '''
+    return the etymological category of the word given
+    :word: the word in question
+    :brown_tag: the tag in the brown corpus
+    :lemmatized: whether this word has been lemmatized yet
+    :return: {'Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 
+              'Old English'}
+    '''
     brown_tag = re.sub("-HL", "", brown_tag)
     brown_tag = re.sub("-TL", "", brown_tag)
     if word in category_dawg:
@@ -212,6 +250,11 @@ def label_word(word, brown_tag, lemmatized=False):
 
 
 def big_pie_maker():
+    '''
+    Big function to make lots of pies. 
+    Generates pies for each of six texts, with and without token frequencies, 
+        and then shows them. 
+    '''
     sentences = brown.tagged_sents("ca09")
     title = "Words in 1961 Philadelphia Inquirer political article"
     print(title)
@@ -259,12 +302,124 @@ def big_pie_maker():
 
 # big_pie_maker()
 
-otherwords = []
-for words in new_category_dict.keys():
-    if new_category_dict[words] == "Other":
-        otherwords.append(words)
+# Take a sample of the words labeled "other"
+# otherwords = []
+# for words in new_category_dict.keys():
+#     if new_category_dict[words] == "Other":
+#         otherwords.append(words)
 
-print("number of 'other': ", len(otherwords))
-import random
-random.shuffle(otherwords)
-print(otherwords[:100])
+# print("number of 'other': ", len(otherwords))
+# import random
+# random.shuffle(otherwords)
+# print(otherwords[:100])
+
+
+# this code borrowed from stackoverflow, I'm really not sure how it works
+# I only added the color. 
+
+def plot_clustered_stacked(dfall, labels=None,
+                           title="multiple stacked bar plot",  H="/", 
+                           **kwargs):
+    """
+    Given a list of dataframes, with identical columns and index,
+    create a clustered stacked bar plot. 
+    labels is a list of the names of the dataframe, used for the legend
+    title is a string for the title of the plot
+    H is the hatch used for identification of the different dataframe"""
+
+    n_df = len(dfall)
+    n_col = len(dfall[0].columns) 
+    n_ind = len(dfall[0].index)
+    axe = plt.subplot(111)
+
+    colors = 'r', 'orange', 'b', 'c', 'm', 'y', 'g'
+    colors = colors[::-1]
+
+    for df in dfall : # for each data frame
+        axe = df.plot(kind="bar",
+                      linewidth=0,
+                      stacked=True,
+                      ax=axe,
+                      legend=False,
+                      grid=False,
+                      colors=colors,
+                      **kwargs)  # make bar plots
+
+    h,l = axe.get_legend_handles_labels() # get the handles we want to modify
+    for i in range(0, n_df * n_col, n_col): # len(h) = n_col * n_df
+        for j, pa in enumerate(h[i:i+n_col]):
+            for rect in pa.patches: # for each index
+                rect.set_x(rect.get_x() + 1 / float(n_df + 1) * i / float(n_col))
+                rect.set_hatch(H * int(i / n_col)) #edited part     
+                rect.set_width(1 / float(n_df + 1))
+
+    axe.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
+    axe.set_xticklabels(df.index, rotation = 0)
+    axe.set_title(title)
+
+    # Add invisible data to add another legend
+    n=[]        
+    for i in range(n_df):
+        n.append(axe.bar(0, 0, color="gray", hatch=H * i))
+
+    l1 = axe.legend(h[:n_col], l[:n_col], loc=[1.01, 0.5])
+    if labels is not None:
+        l2 = plt.legend(n, labels, loc=[1.01, 0.1]) 
+    axe.add_artist(l1)
+    return axe
+
+# create dataframes
+
+sentences = brown.tagged_sents("ca09")
+word_matrix = np.matrix(make_analysis_pie(sentences, show=False)[::-1])
+token_matrix = np.matrix(make_analysis_pie(sentences, show=False, token=True)[::-1])
+
+
+sentences = brown.tagged_sents("cm01")
+new_words = make_analysis_pie(sentences, show=False)[::-1]
+new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+word_matrix = np.vstack((word_matrix, new_words))
+token_matrix = np.vstack((token_matrix, new_tokens))
+
+
+sentences = brown.tagged_sents("cp26")
+new_words = make_analysis_pie(sentences, show=False)[::-1]
+new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+word_matrix = np.vstack((word_matrix, new_words))
+token_matrix = np.vstack((token_matrix, new_tokens))
+
+
+sentences = brown.tagged_sents("cd07")
+new_words = make_analysis_pie(sentences, show=False)[::-1]
+new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+word_matrix = np.vstack((word_matrix, new_words))
+token_matrix = np.vstack((token_matrix, new_tokens))
+
+
+sentences = brown.tagged_sents("ch09")
+new_words = make_analysis_pie(sentences, show=False)[::-1]
+new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+word_matrix = np.vstack((word_matrix, new_words))
+token_matrix = np.vstack((token_matrix, new_tokens))
+
+
+sentences = brown.tagged_sents("cj16")
+new_words = make_analysis_pie(sentences, show=False)[::-1]
+new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+word_matrix = np.vstack((word_matrix, new_words))
+token_matrix = np.vstack((token_matrix, new_tokens))
+
+
+
+df1 = pd.DataFrame(word_matrix,
+                   index=["News", "Sci-fi", "Romance", "Religion", "Legal", "Medical"],
+                   columns=['Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'English'][::-1])
+df2 = pd.DataFrame(token_matrix,
+                   index=["News", "Sci-fi", "Romance", "Religion", "Legal", "Medical"],
+                   columns=['Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'English'][::-1])
+
+
+# Then, just call :
+plot_clustered_stacked([df1, df2],["Words", "Tokens"],
+                       title="Proportions of etymological origins in several texts")
+plt.show()

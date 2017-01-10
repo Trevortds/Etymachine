@@ -79,6 +79,8 @@ def year_extractor(definition):
     '''
     returns the first year that appears in the definiton, rounded to the
         century. Returns 0 if none found
+    :definition: the definiton of the word being featurized
+    :return: 2-digit century
     '''
     match = re.search("\d\d\d\d", definition)
     if match is None:
@@ -89,6 +91,14 @@ def year_extractor(definition):
 
 
 def featurizer(word, definition, letters=False, year=False):
+    '''
+    Transforms  an etymological entry into a feature vector
+    :word: the word being featurized
+    :definition: the definition of the word in etymonline
+    :letters: whether to add the "characters present" feature
+    :year: whether to add the "first attested century" feature
+    :return: a bag of words sparse vector
+    '''
     output = [0] * (len(allwords))
     yearout = []
     lettersout = []
@@ -110,6 +120,20 @@ def featurizer(word, definition, letters=False, year=False):
 
 
 def get_matrices(test_percent, iofilename, letters, year, verbose):
+    '''
+    Prepares data for analysis. 
+    :test_percent: if new_design_matrix is set to "true", how much of the 
+        data available to put into the X and t matrices (set to 1 for full
+        analysis, and .12 for making sure that things work)
+    :iofilename: The name of the file to be read from 
+        (if new_design_matrix=False)
+        or the file to print the results into (if new_design_matrix=True)
+    :letters: whether to include "characters present" feature
+    :year: whether to include "first attested century" feature
+    :verbose: whether to print updates on progress or not 
+        (recommended if making new design matrices for the whole dataset)
+    :return: X, t (design matrix and targets)
+    '''
     X = []
     t = []
 
@@ -168,6 +192,19 @@ def get_matrices(test_percent, iofilename, letters, year, verbose):
 
 def run_CV_test(test_percent, iofilename, letters=False, year=False,
                 verbose=True):
+    '''
+    Runs a cross-validation test on the data with the given parameters. 
+    :test_percent: if new_design_matrix is set to "true", how much of the 
+        data available to put into the X and t matrices (set to 1 for full
+        analysis, and .12 for making sure that things work)
+    :iofilename: The name of the file to be read from 
+        (if new_design_matrix=False)
+        or the file to print the results into (if new_design_matrix=True)
+    :letters: whether to include "characters present" feature
+    :year: whether to include "first attested century" feature
+    :verbose: whether to print updates on progress or not 
+        (recommended if making new design matrices for the whole dataset)
+    '''
     X, t = get_matrices(test_percent, iofilename, letters, year, verbose)
 
     if verbose:
@@ -196,6 +233,17 @@ verbose = True
 
 
 def makelinearmodels(filename, holdout_percent, normalize_X=False):
+    '''
+    Trains a classifier on the data from the given filename and generates a 
+        confusion matrix on it. 
+    :filename: The name of the file to be read from 
+        (if new_design_matrix=False)
+        or the file to print the results into (if new_design_matrix=True)
+    :holdout_percent: What percent of the total data available to hold out 
+        for testing
+    :normalize_X: Whether to normalize the feature space
+    :return: sklearn.svm.LinearSVC classifier trained on the given data
+    '''
     X, t = get_matrices(1, filename, letters=True, year=True,
                         verbose=True)
 
@@ -255,6 +303,8 @@ clf = makelinearmodels("full_bow_letters_year_", .1)
 
 # pl.show()
 
+
+# classify everything, including the data that didn't have a classification yet
 new_category_dict = {}
 transformer = {
     0: "English",

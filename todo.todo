@@ -5,19 +5,24 @@ features:
   ✔ characters present @done (16-11-23 12:30)
   ☐ syllables
   ☐ bigrams (over characters and/or syllables)
-  ☐ attested year (or none) 
+  ✔ attested year (or none)  @done (16-11-28 16:49)
     ☐ normalize over centuries, or continuous value
   ☐ 
 
 Machine learning categorization:
   ✔ vectorize definitions (features below) @done (16-11-23 12:30)
-  ☐ SVM @today
+  ✔ SVM @today @done (16-11-28 14:49)
+    ✔ test different kernels @done (16-11-28 19:44)
+  ✔ Make a confusion matrix visualization @done (16-11-29 08:46)
+
   ☐ run through naive bayes
   ☐ run through k-nearest neighbors
   ☐ add some neural network stuff to this list
 
 
-
+After project is done:
+  ☐ talk to Mark Davies
+  ☐ make webapp
 
 other:
   ☐ find some sources to cite
