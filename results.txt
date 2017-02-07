@@ -1,0 +1,65 @@
+syll
+Accuracy: 0.48
+Precision: 0.47
+Recall: 0.48
+F-score: 0.47
+
+bow
+Accuracy: 0.71
+Precision: 0.71
+Recall: 0.71
+F-score: 0.71
+
+letters
+Accuracy: 0.72
+Precision: 0.72
+Recall: 0.72
+F-score: 0.71
+
+bow letters
+Accuracy: 0.81
+Precision: 0.81
+Recall: 0.81
+F-score: 0.81
+
+syl letters
+Accuracy: 0.75
+Precision: 0.75
+Recall: 0.75
+F-score: 0.75
+
+bow syl
+Accuracy: 0.73
+Precision: 0.73
+Recall: 0.73
+F-score: 0.73
+
+bow syl letters
+Accuracy: 0.82
+Precision: 0.82
+Recall: 0.82
+F-score: 0.82
+
+syl letters year
+Accuracy: 0.75
+Precision: 0.75
+Recall: 0.75
+F-score: 0.75
+
+bow letters year
+Accuracy: 0.81
+Precision: 0.81
+Recall: 0.81
+F-score: 0.81
+
+letters year
+Accuracy: 0.72
+Precision: 0.72
+Recall: 0.72
+F-score: 0.72
+
+bow syl letters year
+Accuracy: 0.82
+Precision: 0.82
+Recall: 0.82
+F-score: 0.82

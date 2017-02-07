@@ -5,6 +5,7 @@ import time
 import re
 from nltk.corpus import stopwords
 from nltk import word_tokenize
+import sklearn
 from sklearn import svm
 from sklearn.model_selection import cross_val_score
 from sklearn import metrics
@@ -12,29 +13,52 @@ from sklearn.preprocessing import normalize
 from scipy.sparse import csr_matrix
 from scipy.sparse import vstack
 import pickle
+import numpy as np
 # import matplotlib as plt
 import pylab as pl
+import pandas as pd
 
 # set these to true and run whenever categorized.tsv changes
 initletters = False
 initwords = False
+initsyllables = True
 new_design_matrix = False
 verbose = True
 iofilename = "bow_"
 
 stops = stopwords.words('english')
+stops.append("English")
+stops.append("French")
+stops.append("Norse")
+stops.append("Latin")
+stops.append("Greek")
+
 etymdict = tsvopener.etymdict
 category_dict = {}
+
+etymwords = []  #list of words in the order that they appear in categorized.tsv
+syllables = []  #list of syllables present based on the words 
+                #as they appear in the above list
 
 with open('categorized.tsv', 'r') as readfile:
     etymreader = csv.reader(readfile, delimiter='\t', quotechar='|')
 
+    
+
     for line in etymreader:
         category_dict[line[0]] = line[1]
+        etymwords.append(line[0])
+
+with open('categorized.tsv.syllables', 'r') as readfile:
+
+    for line in readfile:
+        syllables.append(line.split())
+
 
 
 allwords = []
 allletters = []
+allsyllables = []
 
 print("Initializing wordlist")
 
@@ -75,6 +99,36 @@ else:
             allletters.append(line[:-1])
 
 
+print("Initializing syllable list")
+
+if initsyllables:
+    allsyllables = set()
+
+    for item in syllables:
+        # each of these is a list of syllables present
+        for syl in item:
+            allsyllables.add(syl)
+
+    allsyllables = list(allsyllables)
+
+    with open("syllables.txt", 'w') as writefile:
+        for syl in allsyllables:
+            writefile.write(syl + "\n")
+else:
+    with open("syllables.txt", 'r') as readfile:
+        for line in readfile:
+            allsyllables.append(line[:-1])
+
+
+def syllable_extractor(word):
+    output = [0] * len(allsyllables)
+
+    for syl in syllables[etymwords.index(word)]:
+        output[allsyllables.index(syl)] = 1
+
+    return output
+
+
 def year_extractor(definition):
     '''
     returns the first year that appears in the definiton, rounded to the
@@ -82,15 +136,30 @@ def year_extractor(definition):
     :definition: the definiton of the word being featurized
     :return: 2-digit century
     '''
-    match = re.search("\d\d\d\d", definition)
-    if match is None:
+    four_match = re.search("\d?\d\d\d", definition)
+    two_match = re.search("(\d?\d)(th|st|rd|nd)", definition)
+    if four_match is None and two_match is None:
+        # uncomment for verbatim
         return [0]
-    match = int(match.group(0))
-    match = match // 100
+        # uncomment for one-hot 
+        # return [0] * 20
+    elif two_match is None:
+        match = int(four_match.group(0))
+        match = match // 100
+    else:
+        match = int(two_match.group(1))
+
+    # uncomment for verbatim 
     return [match]
 
+    # uncomment for one-hot
+    # output = [0] * 20
+    # output[match] = 1
+    # return output
 
-def featurizer(word, definition, letters=False, year=False):
+
+def featurizer(word, definition, bow=True, letters=False, 
+    year=False, syllables=False):
     '''
     Transforms  an etymological entry into a feature vector
     :word: the word being featurized
@@ -99,13 +168,21 @@ def featurizer(word, definition, letters=False, year=False):
     :year: whether to add the "first attested century" feature
     :return: a bag of words sparse vector
     '''
-    output = [0] * (len(allwords))
+    output = []
+    bowout = []
     yearout = []
     lettersout = []
+    syllout = []
+    if bow:
+        bowout = [0] * (len(allwords))
     if letters:
         lettersout = [0] * (len(allletters))
     if year:
         yearout = year_extractor(definition)
+    if syllables:
+        #insert syllable logic here
+        syllout = syllable_extractor(word)
+
     # initialize output vector
     for definition_word in word_tokenize(definition):
         # check what letters are present
@@ -113,13 +190,15 @@ def featurizer(word, definition, letters=False, year=False):
             for char in definition_word:
                 lettersout[allletters.index(char)] = 1
         # add to bag of words
-        if definition_word not in stops:
-            output[allwords.index(definition_word)] += 1
-    output = output+lettersout+yearout
+        if bow and definition_word not in stops:
+            bowout[allwords.index(definition_word)] += 1
+
+    output = bowout+lettersout+yearout+syllout
     return csr_matrix(output)
 
 
-def get_matrices(test_percent, iofilename, letters, year, verbose):
+def get_matrices(test_percent, iofilename, bow, letters, year,
+                 syllables, verbose, new_design_matrix):
     '''
     Prepares data for analysis. 
     :test_percent: if new_design_matrix is set to "true", how much of the 
@@ -164,8 +243,8 @@ def get_matrices(test_percent, iofilename, letters, year, verbose):
                 # for some reason the regex categorizer failed to categorize
                 # some items, we will skip these
                 continue
-            X.append(featurizer(key, etymdict[key], letters=letters,
-                                year=year))
+            X.append(featurizer(key, etymdict[key], bow=bow, letters=letters,
+                                year=year, syllables=syllables))
             if verbose:
                 if i % (num_test_keys // 100) == 0:
                     print(("done {:d} out of {:d} words. " +
@@ -190,8 +269,77 @@ def get_matrices(test_percent, iofilename, letters, year, verbose):
     return X, t
 
 
-def run_CV_test(test_percent, iofilename, letters=False, year=False,
-                verbose=True):
+##########################################
+# From Stack Exchange 
+# http://stackoverflow.com/questions/23339523/sklearn-cross-validation-with-multiple-scores
+# needed to be updated to modern sklearn structure, there is no more
+# cross_validation.Kfolds, and the function of KFolds changed. 
+
+
+def get_true_and_pred_CV(estimator, X, y, n_folds, cv, params):
+    ys = []
+    for train_idx, valid_idx in cv.split(X):
+        clf = estimator
+        clf.fit(X[train_idx], y[train_idx])
+        cur_pred = clf.predict(X[valid_idx])
+        # if isinstance(X, np.ndarray):
+        #     clf.fit(X[train_idx], y[train_idx])
+        #     cur_pred = clf.predict(X[valid_idx])
+        # elif isinstance(X, pd.DataFrame):
+        #     clf.fit(X.iloc[train_idx, :], y[train_idx]) 
+        #     cur_pred = clf.predict(X.iloc[valid_idx, :])
+        # else:
+        #     raise Exception('Only numpy array and pandas DataFrame ' \
+        #                     'as types of X are supported')
+
+        ys.append((y[valid_idx], cur_pred))
+    return ys
+
+
+def fit_and_score_CV(estimator, X, y, n_folds=10, stratify=True, **params):
+    if not stratify:
+        cv_arg = sklearn.model_selection.KFold(n_folds)
+    else:
+        cv_arg = sklearn.model_selection.StratifiedKFold(y, n_folds)
+
+    ys = get_true_and_pred_CV(estimator, X, y, n_folds, cv_arg, params)    
+    print(ys)
+    cv_acc = list(map(lambda tp: sklearn.metrics.accuracy_score(tp[0], tp[1]), ys))
+    print(cv_acc)
+    cv_pr_weighted = list(map(lambda tp: sklearn.metrics.precision_score(tp[0], tp[1], average='weighted'), ys))
+    print(cv_pr_weighted)
+    cv_rec_weighted = list(map(lambda tp: sklearn.metrics.recall_score(tp[0], tp[1], average='weighted'), ys))
+    print(cv_rec_weighted)
+    cv_f1_weighted = list(map(lambda tp: sklearn.metrics.f1_score(tp[0], tp[1], average='weighted'), ys))
+    print(cv_f1_weighted)
+
+    # the approach below makes estimator fit multiple times
+    #cv_acc = sklearn.cross_validation.cross_val_score(algo, X, y, cv=cv_arg, scoring='accuracy')
+    #cv_pr_weighted = sklearn.cross_validation.cross_val_score(algo, X, y, cv=cv_arg, scoring='precision_weighted')
+    #cv_rec_weighted = sklearn.cross_validation.cross_val_score(algo, X, y, cv=cv_arg, scoring='recall_weighted')   
+    #cv_f1_weighted = sklearn.cross_validation.cross_val_score(algo, X, y, cv=cv_arg, scoring='f1_weighted')
+    return {'CV accuracy': np.mean(cv_acc), 'CV precision_weighted': np.mean(cv_pr_weighted),
+            'CV recall_weighted': np.mean(cv_rec_weighted), 'CV F1_weighted': np.mean(cv_f1_weighted)}
+
+
+
+
+
+
+############################################3
+
+
+
+
+
+
+
+
+
+
+def run_CV_test(test_percent, iofilename, bow=True, letters=False,
+                year=False, syllables=False,
+                verbose=True, new_design_matrix=False):
     '''
     Runs a cross-validation test on the data with the given parameters. 
     :test_percent: if new_design_matrix is set to "true", how much of the 
@@ -205,17 +353,44 @@ def run_CV_test(test_percent, iofilename, letters=False, year=False,
     :verbose: whether to print updates on progress or not 
         (recommended if making new design matrices for the whole dataset)
     '''
-    X, t = get_matrices(test_percent, iofilename, letters, year, verbose)
+    X, t = get_matrices(test_percent, iofilename, bow, letters, year,
+                        syllables, verbose, new_design_matrix)
 
     if verbose:
-        print("Performing 10-fold CV with a linear SVM")
+        print("Performing 5-fold CV with a linear SVM")
 
     clf = svm.SVC(kernel='linear')
-    scores = cross_val_score(clf, X, t, cv=5)
 
-    print(scores)
-    print("Accuracy: {:0.2f} (+/-) {:0.2f}".format(scores.mean(),
-                                                   scores.std()*2))
+    scores = fit_and_score_CV(clf, X, np.asarray(t), n_folds=5, stratify=False)
+
+    print("Accuracy: {:.02f}".format(scores["CV accuracy"]))
+    print("Precision: {:.02f}".format(scores["CV precision_weighted"]))
+    print("Recall: {:.02f}".format(scores["CV recall_weighted"]))
+    print("F-score: {:.02f}".format(scores["CV F1_weighted"]))
+
+
+    # score = cross_val_score(clf, X, t, cv=5, scoring="precision_macro")
+
+    # print(score)
+    # print("Precision: {:0.2f} (+/-) {:0.2f}".format(score.mean(),
+    #                                                score.std()*2))
+    # score = cross_val_score(clf, X, t, cv=5, scoring="recall_macro")
+
+    # print(score)
+    # print("Recall: {:0.2f} (+/-) {:0.2f}".format(score.mean(),
+    #                                                score.std()*2))
+
+    # score = cross_val_score(clf, X, t, cv=5, scoring="accuracy")
+
+    # print(score)
+    # print("Accuracy: {:0.2f} (+/-) {:0.2f}".format(score.mean(),
+    #                                                score.std()*2))
+    
+    # score = cross_val_score(clf, X, t, cv=5, scoring="f1_macro")
+
+    # print(score)
+    # print("F1: {:0.2f} (+/-) {:0.2f}".format(score.mean(),
+    #                                                score.std()*2))
 
 
 new_design_matrix = False
@@ -232,7 +407,10 @@ new_design_matrix = False
 verbose = True
 
 
-def makelinearmodels(filename, holdout_percent, normalize_X=False):
+def makelinearmodels(filename, holdout_percent, normalize_X=False,
+                     test_percent=1, bow=True, letters=False, year=False, 
+                     syllables=False,
+                     new_design_matrix=False):
     '''
     Trains a classifier on the data from the given filename and generates a 
         confusion matrix on it. 
@@ -244,8 +422,10 @@ def makelinearmodels(filename, holdout_percent, normalize_X=False):
     :normalize_X: Whether to normalize the feature space
     :return: sklearn.svm.LinearSVC classifier trained on the given data
     '''
-    X, t = get_matrices(1, filename, letters=True, year=True,
-                        verbose=True)
+    X, t = get_matrices(test_percent, filename, bow=bow, letters=letters, 
+                        year=year, syllables=syllables,
+                        verbose=True, 
+                        new_design_matrix=new_design_matrix)
 
     holdout = math.floor(X.shape[0] * holdout_percent)
     linclf = svm.LinearSVC()
@@ -269,7 +449,7 @@ def makelinearmodels(filename, holdout_percent, normalize_X=False):
     print("done")
     predicted = linclf.predict(tst)
     print("metrics.f1score: ")
-    print(metrics.f1_score(t_tst, predicted, labels_digits, average="micro"))
+    print(metrics.f1_score(t_tst, predicted, labels_digits, average="macro"))
 
     cm = metrics.confusion_matrix(t_tst, predicted, labels_digits)
 
@@ -294,7 +474,7 @@ def makelinearmodels(filename, holdout_percent, normalize_X=False):
 
 # makelinearmodels("full_bow_", .1)
 # makelinearmodels("full_bow_letters_", .1)
-clf = makelinearmodels("full_bow_letters_year_", .1)
+# clf = makelinearmodels("full_bow_letters_year_", .1)
 
 
 # makelinearmodels("12bow_", 200, normalize_X=True)
@@ -305,18 +485,18 @@ clf = makelinearmodels("full_bow_letters_year_", .1)
 
 
 # classify everything, including the data that didn't have a classification yet
-new_category_dict = {}
-transformer = {
-    0: "English",
-    1: "French",
-    2: "Norse",
-    3: "Latin",
-    4: "Greek",
-    5: "Other",
-}
+# new_category_dict = {}
+# transformer = {
+#     0: "English",
+#     1: "French",
+#     2: "Norse",
+#     3: "Latin",
+#     4: "Greek",
+#     5: "Other",
+# }
 
-for word in etymdict.keys():
-    vector = featurizer(word, etymdict[word], letters=True, year=True)
-    prediction = clf.predict(vector)
-    prediction = prediction[0]
-    new_category_dict[word] = transformer[prediction]
+# for word in etymdict.keys():
+#     vector = featurizer(word, etymdict[word], letters=True, year=True)
+#     prediction = clf.predict(vector)
+#     prediction = prediction[0]
+#     new_category_dict[word] = transformer[prediction]

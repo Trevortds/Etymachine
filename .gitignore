@@ -3,6 +3,10 @@ etymonline.tsv
 old/etymologies.csv
 letters.txt
 words.txt
+.ipynb_checkpoints/
+.ipynb_checkpoints/*
+categorized.tsv.syllables
+
 
 
 #This stupid thing

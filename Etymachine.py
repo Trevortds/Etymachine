@@ -105,7 +105,7 @@ def make_analysis_pie(sentences, title="Pie Chart", token=False, ignore_unknowns
                 u += 1
     total = u + e + f + n + l + g + o
     fracs = [u/total, o/total, n/total, g/total, l/total, f/total, e/total]
-    labels = 'Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'English'
+    labels = 'Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'Old English'
     colors = 'r', 'orange', 'b', 'c', 'm', 'y', 'g'
     if ignore_unknowns:
         total = e + f + n + l + g + o
@@ -370,56 +370,58 @@ def plot_clustered_stacked(dfall, labels=None,
 
 # create dataframes
 
-sentences = brown.tagged_sents("ca09")
-word_matrix = np.matrix(make_analysis_pie(sentences, show=False)[::-1])
-token_matrix = np.matrix(make_analysis_pie(sentences, show=False, token=True)[::-1])
+def big_chart_maker():
+
+    sentences = brown.tagged_sents("ca09")
+    word_matrix = np.matrix(make_analysis_pie(sentences, show=False)[::-1])
+    token_matrix = np.matrix(make_analysis_pie(sentences, show=False, token=True)[::-1])
 
 
-sentences = brown.tagged_sents("cm01")
-new_words = make_analysis_pie(sentences, show=False)[::-1]
-new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
-word_matrix = np.vstack((word_matrix, new_words))
-token_matrix = np.vstack((token_matrix, new_tokens))
+    sentences = brown.tagged_sents("cm01")
+    new_words = make_analysis_pie(sentences, show=False)[::-1]
+    new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+    word_matrix = np.vstack((word_matrix, new_words))
+    token_matrix = np.vstack((token_matrix, new_tokens))
 
 
-sentences = brown.tagged_sents("cp26")
-new_words = make_analysis_pie(sentences, show=False)[::-1]
-new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
-word_matrix = np.vstack((word_matrix, new_words))
-token_matrix = np.vstack((token_matrix, new_tokens))
+    sentences = brown.tagged_sents("cp26")
+    new_words = make_analysis_pie(sentences, show=False)[::-1]
+    new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+    word_matrix = np.vstack((word_matrix, new_words))
+    token_matrix = np.vstack((token_matrix, new_tokens))
 
 
-sentences = brown.tagged_sents("cd07")
-new_words = make_analysis_pie(sentences, show=False)[::-1]
-new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
-word_matrix = np.vstack((word_matrix, new_words))
-token_matrix = np.vstack((token_matrix, new_tokens))
+    sentences = brown.tagged_sents("cd07")
+    new_words = make_analysis_pie(sentences, show=False)[::-1]
+    new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+    word_matrix = np.vstack((word_matrix, new_words))
+    token_matrix = np.vstack((token_matrix, new_tokens))
 
 
-sentences = brown.tagged_sents("ch09")
-new_words = make_analysis_pie(sentences, show=False)[::-1]
-new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
-word_matrix = np.vstack((word_matrix, new_words))
-token_matrix = np.vstack((token_matrix, new_tokens))
+    sentences = brown.tagged_sents("ch09")
+    new_words = make_analysis_pie(sentences, show=False)[::-1]
+    new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+    word_matrix = np.vstack((word_matrix, new_words))
+    token_matrix = np.vstack((token_matrix, new_tokens))
 
 
-sentences = brown.tagged_sents("cj16")
-new_words = make_analysis_pie(sentences, show=False)[::-1]
-new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
-word_matrix = np.vstack((word_matrix, new_words))
-token_matrix = np.vstack((token_matrix, new_tokens))
+    sentences = brown.tagged_sents("cj16")
+    new_words = make_analysis_pie(sentences, show=False)[::-1]
+    new_tokens = make_analysis_pie(sentences, show=False, token=True)[::-1]
+    word_matrix = np.vstack((word_matrix, new_words))
+    token_matrix = np.vstack((token_matrix, new_tokens))
 
 
 
-df1 = pd.DataFrame(word_matrix,
-                   index=["News", "Sci-fi", "Romance", "Religion", "Legal", "Medical"],
-                   columns=['Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'English'][::-1])
-df2 = pd.DataFrame(token_matrix,
-                   index=["News", "Sci-fi", "Romance", "Religion", "Legal", "Medical"],
-                   columns=['Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'English'][::-1])
+    df1 = pd.DataFrame(word_matrix,
+                       index=["News", "Sci-fi", "Romance", "Religion", "Legal", "Medical"],
+                       columns=['Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'Old English'][::-1])
+    df2 = pd.DataFrame(token_matrix,
+                       index=["News", "Sci-fi", "Romance", "Religion", "Legal", "Medical"],
+                       columns=['Unknown', 'Other', 'Norse', 'Greek', 'Latin', 'French', 'Old English'][::-1])
 
 
-# Then, just call :
-plot_clustered_stacked([df1, df2],["Words", "Tokens"],
-                       title="Proportions of etymological origins in several texts")
-plt.show()
+    # Then, just call :
+    plot_clustered_stacked([df1, df2],["Words", "Tokens"],
+                           title="Proportions of etymological origins in several texts")
+    plt.show()

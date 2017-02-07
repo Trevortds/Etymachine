@@ -78,8 +78,10 @@ def makelinks(etymdict):
     :return: the same dictionary with the links resolved
     '''
     see_pattern = re.compile("^[sS]ee (.*?)[.,;]( |$)")
+    plural_pattern = re.compile("^[pP]lural of (.*?)( \()?[.,;]( |$)")
     for key in etymdict.keys():
         match = see_pattern.search(etymdict[key])
+        plural_match = plural_pattern.search(etymdict[key])
         if match is not None:
             linkword = match.group(1)
             print(linkword, " ", key)
@@ -117,6 +119,43 @@ def makelinks(etymdict):
                 linkword = linkword[:-10] + " (adj., adv.)"
 
             etymdict[key] = etymdict[linkword]
+        # if plural_match is not None:
+        #     linkword = plural_match.group(1)
+        #     print(linkword, " ", key)
+        #     # just writing more cases until they all go through
+        #     # some had to be done manually
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword + " (v.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-5] + " (n.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-5] + " (n.1)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-6] + " (n.2)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-6] + " (adj.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-7] + " (adv.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-7] + " (interj.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-10] + " (pron.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-8].lower()
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword + " (v.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-5] + " (n.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-5] + " (adj.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-7] + " (adv.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-7] + " (interj.)"
+        #     if linkword not in etymdict.keys():
+        #         linkword = linkword[:-10] + " (adj., adv.)"
+
+        #     etymdict[key] = etymdict[linkword]
 
     return etymdict
 

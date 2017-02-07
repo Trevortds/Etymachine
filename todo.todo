@@ -1,5 +1,20 @@
 
 
+Stuff to do now:
+  ☐ do CV test with syllables
+  ☐ add language names to stopwords list
+  ☐ add code to submission
+  add readme to submission (python notebook)
+
+  ☐ run through naive bayes
+  ☐ run through k-nearest neighbors
+  ☐ add some neural network stuff to this list  ☐ run through naive bayes
+  ☐ run through k-nearest neighbors
+  ☐ add some neural network stuff to this list  ☐ run through naive bayes
+  ☐ run through k-nearest neighbors
+  ☐ add some neural network stuff to this list
+
+
 features:
   ✔ bag of words @done (16-11-21 13:25)
   ✔ characters present @done (16-11-23 12:30)
