@@ -27,11 +27,11 @@ verbose = True
 iofilename = "bow_"
 
 stops = stopwords.words('english')
-stops.append("English")
-stops.append("French")
-stops.append("Norse")
-stops.append("Latin")
-stops.append("Greek")
+# stops.append("English")
+# stops.append("French")
+# stops.append("Norse")
+# stops.append("Latin")
+# stops.append("Greek")
 
 etymdict = tsvopener.etymdict
 category_dict = {}

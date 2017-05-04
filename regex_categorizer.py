@@ -1,6 +1,7 @@
 import tsvopener
 import random
 import re
+import numpy
 
 etymdict = tsvopener.etymdict
 
@@ -13,7 +14,8 @@ hierarchies = {
     "Latin": ["Latin", "Etruscan"],
     "Norse": ["Old Norse", "Proto-North-Germanic", "North Germanic",
               "Scandanavian", "Danish"],
-    "French": ["French", "Middle French", "Old French", "Medieval Latin",
+    "French": ["French", "Middle French", "Old French", "Frankish", 
+                "Medieval Latin",
                ],
     "English": ["Old English", "Ingvaeonic", "Frisian", "Saxon",
                 "Proto-West-Germanic", "Proto-Germanic", "Germanic"],
@@ -126,14 +128,83 @@ def manually_check(etymdict, category_dict, num):
             break
 
 
+def manual_categorize():
+
+    prob_array = [eng/tot,
+                  fr/tot,
+                  gr/tot,
+                  lat/tot,
+                  nor/tot,
+                  other/tot,
+                  ]
+
+    with open("human_categorized.tsv", 'a') as writefile:
+
+        print("Classifying manually. Outputs go to human_categorized.tsv")
+
+        stop = False
+        while not stop:
+            bin_sample = numpy.random.multinomial(1, prob_array, size=1)
+            bin_choice = numpy.where(bin_sample == 1)[1][0]
+
+            if bin_choice == 0:
+                sample_word = numpy.random.choice(eng_bin)
+            if bin_choice == 1:
+                sample_word = numpy.random.choice(fr_bin)
+            if bin_choice == 2:
+                sample_word = numpy.random.choice(gr_bin)
+            if bin_choice == 3:
+                sample_word = numpy.random.choice(lat_bin)
+            if bin_choice == 4:
+                sample_word = numpy.random.choice(nor_bin)
+            if bin_choice == 5:
+                sample_word = numpy.random.choice(other_bin)
+            
+            # sample_word = numpy.random.choice(gr_bin) to get more exemplars from one category
+
+            sample_definition = etymdict[sample_word]
+
+            print("Word: ", sample_word)
+            print("Definition: ", sample_definition)
+
+            while True:
+                judge = input("Choice? (e, f, g, l, n, o) 'close' to close : ")
+                if judge == "e":
+                    writefile.write("{}\tEnglish\n".format(sample_word))
+                elif judge == "f":
+                    writefile.write("{}\tFrench\n".format(sample_word))
+                elif judge == "g":
+                    writefile.write("{}\tGreek\n".format(sample_word))
+                elif judge == "l":
+                    writefile.write("{}\tLatin\n".format(sample_word))
+                elif judge == "n":
+                    writefile.write("{}\tNorse\n".format(sample_word))
+                elif judge == "o":
+                    writefile.write("{}\tOther\n".format(sample_word))
+                elif judge == "close":
+                    stop = True
+                else:
+                    continue
+                break
+
+
+
+
 if __name__ == '__main__':
+    eng = 0
+    fr = 0
     gr = 0
     lat = 0
     nor = 0
-    fr = 0
-    eng = 0
     other = 0
     tot = 0
+
+    eng_bin = []
+    fr_bin = []
+    gr_bin = []
+    lat_bin = []
+    nor_bin = []
+    other_bin = []
 
     print("categorizing")
 
@@ -142,16 +213,22 @@ if __name__ == '__main__':
         category_dict[word] = cat
         if cat == "English":
             eng += 1
+            eng_bin += [word]
         elif cat == "French":
             fr += 1
+            fr_bin += [word]
         elif cat == "Greek":
             gr += 1
+            gr_bin += [word]
         elif cat == "Latin":
             lat += 1
+            lat_bin += [word]
         elif cat == "Norse":
             nor += 1
+            nor_bin += [word]
         elif cat == "Other":
             other += 1
+            other_bin += [word]
         tot += 1
 
     print("done")
@@ -165,4 +242,8 @@ if __name__ == '__main__':
 
     print("Total: ", tot)
 
+    print("written out to regex_categorized.tsv")
+
     tsvopener.writeitout(category_dict, "categorized.tsv")
+
+    manual_categorize()
