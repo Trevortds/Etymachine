@@ -34,13 +34,13 @@ with open('etymologies.csv', 'wb') as csvfile:
 				#INSERT FANCY NLP STUFF HERE
 				lang = re.findall(from_regex, no_html_string)
 				
-				print lang
+				print( lang)
 				lang_2 = [lang[i][1] for i in range(0,len(lang))] #taking the second row of lang, which is a multidimensnional array
 
 				
 				
 				
-				print lang_2;
+				print( lang_2)
 
 				if (len(lang_2) == 0):
 					save = subprocess.check_output("python GrabberGui.py \'" + list_of_words[j] + "\' \'" +
@@ -50,7 +50,7 @@ with open('etymologies.csv', 'wb') as csvfile:
 				elif (lang_2[0] == "Greek"):
 					save = "Greek"
 				elif (lang_2[0] == "Old"):
-					print lang_2
+					print( lang_2)
 					save = ''.join(lang_2)
 				else:
 					save = subprocess.check_output("python GrabberGui.py \'" + list_of_words[j] + "\' \'" +
@@ -70,7 +70,7 @@ with open('etymologies.csv', 'wb') as csvfile:
 				
 
 				if(len(lang) > 1 or len(lang) == 0):
-					#print lang
+					#print( lang)
 					save = subprocess.check_output("python GrabberGui.py \'" + list_of_words[j] + "\' \'"+
 						no_html_string + "\'", shell=True)
 				elif (lang[0] == "Latin"):

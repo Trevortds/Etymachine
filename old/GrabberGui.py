@@ -1,5 +1,5 @@
 
-from Tkinter import *
+from tkinter import *
 import sys
 
 the_word = sys.argv[1]
@@ -80,36 +80,36 @@ class GrabberGui(Frame):
 		self.QUIT.pack({"side":"left"})
 
 	def Skip(self):
-		print "skip"
+		print( "skip")
 		self.quit()
 
 	def OldEng(self):
-		print "Old English"
+		print( "Old English")
 		self.quit()
 
 	def OldFr(self):
-		print "Old French"
+		print( "Old French")
 		self.quit()
 
 	def MidEng(self):
-		print "Middle English"
+		print( "Middle English")
 		self.quit()
 
 	def MidFr(self):
-		print "Middle French"
+		print( "Middle French")
 		self.quit()
 
 	def Latin(self):
-		print "Latin"
+		print( "Latin")
 		self.quit()
 
 	def Greek(self):
-		print "Greek"
+		print( "Greek")
 		self.quit()
 
 	def send_user_text(self):
 		temp = self.INPUT.get()
-		print temp
+		print( temp)
 		self.quit()
 
 

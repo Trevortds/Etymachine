@@ -22,7 +22,7 @@ features:
   ☐ bigrams (over characters and/or syllables)
   ✔ attested year (or none)  @done (16-11-28 16:49)
     ☐ normalize over centuries, or continuous value
-  ☐ 
+  ☐
 
 Machine learning categorization:
   ✔ vectorize definitions (features below) @done (16-11-23 12:30)
@@ -42,11 +42,6 @@ After project is done:
 other:
   ☐ find some sources to cite
 
-
-
-
-
-
 preprocessing:
 
 initial categorization:
@@ -56,8 +51,8 @@ Archive:
  ✘ include a method for going backwards for a mistake @cancelled (16-11-15 16:14) @project(initial categorization)
  ✔ write in doc @done (16-11-15 16:14) @project(initial categorization)
  ✔ do it @done (16-11-15 16:14) @project(initial categorization)
-  some words don't have language names in their definitions, but do have references to other forms of themselves. This causes a loop. 
-  some words don't have an origin, like "buzz", these need to be encoded as "other" manually. 
+  some words don't have language names in their definitions, but do have references to other forms of themselves. This causes a loop.
+  some words don't have an origin, like "buzz", these need to be encoded as "other" manually.
  ✔ check the tags on those samples against the definitions, record the number of errors @today @done (16-11-15 16:14) @project(initial categorization)
  ✔ take user input (correction or none) and store stats (store result in new file) @done (16-11-15 14:08) @project(initial categorization)
  ✔ take a random sample of about 10% of the data @today @done (16-11-15 14:08) @project(initial categorization)
